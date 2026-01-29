@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secret Code Translator</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#020617;
+  color:#e5e7eb;
+  padding-bottom:200px;
+}
+.container{
+  padding:16px;
+}
+h2{
+  margin:10px 0 6px;
+}
+textarea{
+  width:100%;
+  height:90px;
+  background:#020617;
+  color:#e5e7eb;
+  border:1px solid #334155;
+  border-radius:8px;
+  padding:10px;
+  resize:none;
+  box-sizing:border-box;
+}
+
+/* keyboard */
+.keyboard{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#020617;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+  padding:10px;
+  box-sizing:border-box;
+  touch-action:none;
+}
+.keyboard button{
+  padding:12px 0;
+  font-size:15px;
+  border:none;
+  border-radius:8px;
+  background:#1e293b;
+  color:white;
+  transition:.1s;
+}
+.keyboard button:active{
+  transform:scale(.9);
+  background:#2563eb;
+}
+.del{background:#7c2d12;}
+.mode{background:#065f46;}
+.space{grid-column:span 3;}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h2>Plaintext</h2>
+  <textarea id="plain" readonly></textarea>
+
+  <h2>Secret Code</h2>
+  <textarea id="code" readonly></textarea>
+</div>
+
+<div class="keyboard">
+  <button onclick="typeChar('A')">A</button>
+  <button onclick="typeChar('B')">B</button>
+  <button onclick="typeChar('C')">C</button>
+  <button onclick="typeChar('D')">D</button>
+  <button onclick="typeChar('E')">E</button>
+  <button onclick="typeChar('F')">F</button>
+
+  <button onclick="typeChar('G')">G</button>
+  <button onclick="typeChar('H')">H</button>
+  <button onclick="typeChar('I')">I</button>
+  <button onclick="typeChar('J')">J</button>
+  <button onclick="typeChar('K')">K</button>
+  <button onclick="typeChar('L')">L</button>
+
+  <button onclick="typeChar('M')">M</button>
+  <button onclick="typeChar('N')">N</button>
+  <button onclick="typeChar('O')">O</button>
+  <button onclick="typeChar('P')">P</button>
+  <button onclick="typeChar('Q')">Q</button>
+  <button onclick="typeChar('R')">R</button>
+
+  <button onclick="typeChar('S')">S</button>
+  <button onclick="typeChar('T')">T</button>
+  <button onclick="typeChar('U')">U</button>
+  <button onclick="typeChar('V')">V</button>
+  <button onclick="typeChar('W')">W</button>
+  <button onclick="typeChar('X')">X</button>
+
+  <button onclick="typeChar('Y')">Y</button>
+  <button onclick="typeChar('Z')">Z</button>
+  <button class="space" onclick="typeChar(' ')">SPACE</button>
+  <button class="mode" onclick="switchMode()">⇅</button>
+  <button class="del" onclick="del()">⌫</button>
+</div>
+
+<script>
+const codeMap = {
+ A:"/",  B:":.", C:":",  D:"|",  E:"-:",
+ F:"=",  G:"g~", H:"|-", I:"!",  J:"'-",
+ K:"'",  L:"--", M:"^",  N:"\\",  O:"°",
+ P:"{",  Q:"x:", R:"r=", S:"≡",  T:"─",
+ U:"u:", V:"_",  W:"vv", X:"::", Y:"[",
+ Z:">"
+};
+
+const decodeMap = {};
+for(let k in codeMap){ decodeMap[codeMap[k]] = k; }
+
+let mode = "plain";
+const plain = document.getElementById("plain");
+const code  = document.getElementById("code");
+
+function typeChar(c){
+  if(mode==="plain"){
+    plain.value += c;
+    encode();
+  }else{
+    code.value += c;
+    decode();
+  }
+}
+
+function del(){
+  if(mode==="plain"){
+    plain.value = plain.value.slice(0,-1);
+    encode();
+  }else{
+    code.value = code.value.slice(0,-1);
+    decode();
+  }
+}
+
+function switchMode(){
+  mode = mode==="plain" ? "code" : "plain";
+}
+
+function encode(){
+  let out="";
+  for(let c of plain.value.toUpperCase()){
+    if(codeMap[c]) out += codeMap[c];
+    else if(c===" ") out+=" ";
+  }
+  code.value = out;
+}
+
+function decode(){
+  let t = code.value;
+  let res="", i=0;
+  while(i<t.length){
+    let found=false;
+    for(let s in decodeMap){
+      if(t.startsWith(s,i)){
+        res += decodeMap[s];
+        i += s.length;
+        found=true;
+        break;
+      }
+    }
+    if(!found){
+      if(t[i]===" ") res+=" ";
+      i++;
+    }
+  }
+  plain.value = res;
+}
+</script>
+
+</body>
+</html>
