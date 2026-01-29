@@ -6,107 +6,102 @@
 <title>Secret Code Translator</title>
 
 <style>
+*{
+  box-sizing:border-box;
+  font-family: monospace;
+}
+
 body{
+  background:#0f0f0f;
+  color:#fff;
   margin:0;
-  font-family:Arial, sans-serif;
-  background:#020617;
-  color:#e5e7eb;
-  padding-bottom:200px;
+  padding:15px;
 }
+
+h1{
+  text-align:center;
+  margin-bottom:15px;
+}
+
 .container{
-  padding:16px;
+  max-width:600px;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  gap:15px;
 }
-h2{
-  margin:10px 0 6px;
+
+.box{
+  background:#161616;
+  padding:10px;
+  border-radius:8px;
 }
+
+label{
+  font-size:13px;
+  color:#aaa;
+}
+
 textarea{
   width:100%;
   height:90px;
-  background:#020617;
-  color:#e5e7eb;
-  border:1px solid #334155;
-  border-radius:8px;
-  padding:10px;
+  background:#0f0f0f;
+  color:#fff;
+  border:1px solid #333;
+  border-radius:6px;
+  padding:8px;
   resize:none;
-  box-sizing:border-box;
 }
 
-/* keyboard */
-.keyboard{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:#020617;
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:8px;
-  padding:10px;
-  box-sizing:border-box;
-  touch-action:none;
+.buttons{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
 }
-.keyboard button{
-  padding:12px 0;
-  font-size:15px;
-  border:none;
-  border-radius:8px;
-  background:#1e293b;
-  color:white;
-  transition:.1s;
-}
-.keyboard button:active{
-  transform:scale(.9);
+
+button{
+  flex:1;
+  padding:8px;
   background:#2563eb;
+  border:none;
+  border-radius:6px;
+  color:white;
+  cursor:pointer;
 }
-.del{background:#7c2d12;}
-.mode{background:#065f46;}
-.space{grid-column:span 3;}
+
+button.secondary{
+  background:#374151;
+}
+
+button:active{
+  transform:scale(.97);
+}
 </style>
 </head>
 
 <body>
+<h1>Secret Code Translator</h1>
+
 <div class="container">
-  <h2>Plaintext</h2>
-  <textarea id="plain" readonly></textarea>
 
-  <h2>Secret Code</h2>
-  <textarea id="code" readonly></textarea>
-</div>
+  <div class="box">
+    <label>Plaintext</label>
+    <textarea id="plain" placeholder="Paste atau ketik teks biasa..."></textarea>
+    <div class="buttons">
+      <button onclick="copyText('plain')">Copy</button>
+      <button class="secondary" onclick="clearText('plain')">Clear</button>
+    </div>
+  </div>
 
-<div class="keyboard">
-  <button onclick="typeChar('A')">A</button>
-  <button onclick="typeChar('B')">B</button>
-  <button onclick="typeChar('C')">C</button>
-  <button onclick="typeChar('D')">D</button>
-  <button onclick="typeChar('E')">E</button>
-  <button onclick="typeChar('F')">F</button>
+  <div class="box">
+    <label>Secret Code</label>
+    <textarea id="code" placeholder="Paste atau ketik kode rahasia..."></textarea>
+    <div class="buttons">
+      <button onclick="copyText('code')">Copy</button>
+      <button class="secondary" onclick="clearText('code')">Clear</button>
+    </div>
+  </div>
 
-  <button onclick="typeChar('G')">G</button>
-  <button onclick="typeChar('H')">H</button>
-  <button onclick="typeChar('I')">I</button>
-  <button onclick="typeChar('J')">J</button>
-  <button onclick="typeChar('K')">K</button>
-  <button onclick="typeChar('L')">L</button>
-
-  <button onclick="typeChar('M')">M</button>
-  <button onclick="typeChar('N')">N</button>
-  <button onclick="typeChar('O')">O</button>
-  <button onclick="typeChar('P')">P</button>
-  <button onclick="typeChar('Q')">Q</button>
-  <button onclick="typeChar('R')">R</button>
-
-  <button onclick="typeChar('S')">S</button>
-  <button onclick="typeChar('T')">T</button>
-  <button onclick="typeChar('U')">U</button>
-  <button onclick="typeChar('V')">V</button>
-  <button onclick="typeChar('W')">W</button>
-  <button onclick="typeChar('X')">X</button>
-
-  <button onclick="typeChar('Y')">Y</button>
-  <button onclick="typeChar('Z')">Z</button>
-  <button class="space" onclick="typeChar(' ')">SPACE</button>
-  <button class="mode" onclick="switchMode()">⇅</button>
-  <button class="del" onclick="del()">⌫</button>
 </div>
 
 <script>
@@ -122,39 +117,17 @@ const codeMap = {
 const decodeMap = {};
 for(let k in codeMap){ decodeMap[codeMap[k]] = k; }
 
-let mode = "plain";
 const plain = document.getElementById("plain");
 const code  = document.getElementById("code");
 
-function typeChar(c){
-  if(mode==="plain"){
-    plain.value += c;
-    encode();
-  }else{
-    code.value += c;
-    decode();
-  }
-}
-
-function del(){
-  if(mode==="plain"){
-    plain.value = plain.value.slice(0,-1);
-    encode();
-  }else{
-    code.value = code.value.slice(0,-1);
-    decode();
-  }
-}
-
-function switchMode(){
-  mode = mode==="plain" ? "code" : "plain";
-}
+plain.addEventListener("input", encode);
+code.addEventListener("input", decode);
 
 function encode(){
   let out="";
   for(let c of plain.value.toUpperCase()){
     if(codeMap[c]) out += codeMap[c];
-    else if(c===" ") out+=" ";
+    else if(c===" ") out += " ";
   }
   code.value = out;
 }
@@ -166,8 +139,8 @@ function decode(){
     let found=false;
     for(let s in decodeMap){
       if(t.startsWith(s,i)){
-        res += decodeMap[s];
-        i += s.length;
+        res+=decodeMap[s];
+        i+=s.length;
         found=true;
         break;
       }
@@ -178,6 +151,17 @@ function decode(){
     }
   }
   plain.value = res;
+}
+
+function copyText(id){
+  const el = document.getElementById(id);
+  el.select();
+  el.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(el.value);
+}
+
+function clearText(id){
+  document.getElementById(id).value="";
 }
 </script>
 
