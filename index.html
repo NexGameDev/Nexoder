@@ -1,169 +1,134 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secret Code Translator</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Secret Code Decoder</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  font-family: monospace;
-}
+  * {
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
 
-body{
-  background:#0f0f0f;
-  color:#fff;
-  margin:0;
-  padding:15px;
-}
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-h1{
-  text-align:center;
-  margin-bottom:15px;
-}
+  .container {
+    width: 100%;
+    max-width: 420px;
+    padding: 16px;
+  }
 
-.container{
-  max-width:600px;
-  margin:auto;
-  display:flex;
-  flex-direction:column;
-  gap:15px;
-}
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+  }
 
-.box{
-  background:#161616;
-  padding:10px;
-  border-radius:8px;
-}
+  label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
 
-label{
-  font-size:13px;
-  color:#aaa;
-}
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: #020617;
+    color: #e5e7eb;
+    font-size: 16px;
+    resize: none;
 
-textarea{
-  width:100%;
-  height:90px;
-  background:#0f0f0f;
-  color:#fff;
-  border:1px solid #333;
-  border-radius:6px;
-  padding:8px;
-  resize:none;
-}
+    /* PENTING */
+    readonly: true;
+  }
 
-.buttons{
-  display:flex;
-  gap:10px;
-  margin-top:8px;
-}
+  textarea::placeholder {
+    color: #64748b;
+  }
 
-button{
-  flex:1;
-  padding:8px;
-  background:#2563eb;
-  border:none;
-  border-radius:6px;
-  color:white;
-  cursor:pointer;
-}
-
-button.secondary{
-  background:#374151;
-}
-
-button:active{
-  transform:scale(.97);
-}
+  .hint {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
 </style>
 </head>
 
 <body>
-<h1>Secret Code Translator</h1>
+  <div class="container">
+    <h1>🔐 Secret Code Decoder</h1>
 
-<div class="container">
-
-  <div class="box">
     <label>Plaintext</label>
-    <textarea id="plain" placeholder="Paste atau ketik teks biasa..."></textarea>
-    <div class="buttons">
-      <button onclick="copyText('plain')">Copy</button>
-      <button class="secondary" onclick="clearText('plain')">Clear</button>
-    </div>
-  </div>
+    <textarea id="plain" readonly placeholder="Tempel teks biasa di sini..."></textarea>
 
-  <div class="box">
     <label>Secret Code</label>
-    <textarea id="code" placeholder="Paste atau ketik kode rahasia..."></textarea>
-    <div class="buttons">
-      <button onclick="copyText('code')">Copy</button>
-      <button class="secondary" onclick="clearText('code')">Clear</button>
+    <textarea id="code" readonly placeholder="Tempel kode rahasia di sini..."></textarea>
+
+    <div class="hint">
+      Tap tahan → <b>Tempel</b> (keyboard tidak akan muncul)
     </div>
   </div>
-
-</div>
 
 <script>
-const codeMap = {
- A:"/",  B:":.", C:":",  D:"|",  E:"-:",
- F:"=",  G:"g~", H:"|-", I:"!",  J:"'-",
- K:"'",  L:"--", M:"^",  N:"\\",  O:"°",
- P:"{",  Q:"x:", R:"r=", S:"≡",  T:"─",
- U:"u:", V:"_",  W:"vv", X:"::", Y:"[",
- Z:">"
-};
+  const map = {
+    A:"/", B:":.", C:":", D:"|", E:"-:", F:"=",
+    G:"g~", H:"|-", I:"!", J:"'-", K:"'",
+    L:"--", M:"^", N:"\\", O:"°", P:"{",
+    Q:"x:", R:"r=", S:"≡", T:"─", U:"u:",
+    V:"_", W:"vv", X:"::", Y:"[", Z:">"
+  };
 
-const decodeMap = {};
-for(let k in codeMap){ decodeMap[codeMap[k]] = k; }
+  const reverseMap = Object.fromEntries(
+    Object.entries(map).map(([k,v]) => [v,k])
+  );
 
-const plain = document.getElementById("plain");
-const code  = document.getElementById("code");
+  const plain = document.getElementById("plain");
+  const code  = document.getElementById("code");
 
-plain.addEventListener("input", encode);
-code.addEventListener("input", decode);
-
-function encode(){
-  let out="";
-  for(let c of plain.value.toUpperCase()){
-    if(codeMap[c]) out += codeMap[c];
-    else if(c===" ") out += " ";
+  function encode(text) {
+    return text
+      .toUpperCase()
+      .split("")
+      .map(c => c === " " ? " " : (map[c] || ""))
+      .join("");
   }
-  code.value = out;
-}
 
-function decode(){
-  let t = code.value;
-  let res="", i=0;
-  while(i<t.length){
-    let found=false;
-    for(let s in decodeMap){
-      if(t.startsWith(s,i)){
-        res+=decodeMap[s];
-        i+=s.length;
-        found=true;
-        break;
+  function decode(text) {
+    return text.split(" ").map(word => {
+      let out = "";
+      let buffer = "";
+
+      for (let ch of word) {
+        buffer += ch;
+        if (reverseMap[buffer]) {
+          out += reverseMap[buffer];
+          buffer = "";
+        }
       }
-    }
-    if(!found){
-      if(t[i]===" ") res+=" ";
-      i++;
-    }
+      return out;
+    }).join(" ");
   }
-  plain.value = res;
-}
 
-function copyText(id){
-  const el = document.getElementById(id);
-  el.select();
-  el.setSelectionRange(0, 99999);
-  navigator.clipboard.writeText(el.value);
-}
+  plain.addEventListener("input", () => {
+    code.value = encode(plain.value);
+  });
 
-function clearText(id){
-  document.getElementById(id).value="";
-}
+  code.addEventListener("input", () => {
+    plain.value = decode(code.value);
+  });
 </script>
-
 </body>
 </html>
