@@ -1,134 +1,149 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Secret Code Decoder</title>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<title>🔐 Secret Code Decoder</title>
 
 <style>
-  * {
-    box-sizing: border-box;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: radial-gradient(circle at top, #0b1430, #040814);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
 
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: radial-gradient(circle at top, #0f172a, #020617);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+.container {
+  max-width: 420px;
+  margin: auto;
+  padding: 24px 16px 40px;
+  color: #fff;
+}
 
-  .container {
-    width: 100%;
-    max-width: 420px;
-    padding: 16px;
-  }
+h1 {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 24px;
+}
 
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.4rem;
-  }
+label {
+  font-size: 14px;
+  opacity: 0.9;
+}
 
-  label {
-    font-weight: 600;
-    margin-bottom: 6px;
-    display: block;
-  }
+textarea {
+  width: 100%;
+  height: 120px;
+  margin-top: 8px;
+  margin-bottom: 20px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 2px solid rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 16px; /* WAJIB 16px (anti zoom) */
+  resize: none;
+  outline: none;
+}
 
-  textarea {
-    width: 100%;
-    min-height: 120px;
-    padding: 12px;
-    margin-bottom: 16px;
-    border-radius: 12px;
-    border: 1px solid #334155;
-    background: #020617;
-    color: #e5e7eb;
-    font-size: 16px;
-    resize: none;
+textarea:focus {
+  border-color: #ffb000;
+  box-shadow: 0 0 0 2px rgba(255,176,0,0.25);
+}
 
-    /* PENTING */
-    readonly: true;
-  }
-
-  textarea::placeholder {
-    color: #64748b;
-  }
-
-  .hint {
-    text-align: center;
-    font-size: 0.85rem;
-    color: #94a3b8;
-  }
+.hint {
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.6;
+}
 </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>🔐 Secret Code Decoder</h1>
+<div class="container">
+  <h1>🔐 Secret Code Decoder</h1>
 
-    <label>Plaintext</label>
-    <textarea id="plain" readonly placeholder="Tempel teks biasa di sini..."></textarea>
+  <label>Plaintext</label>
+  <textarea id="plain" placeholder="Ketik atau tempel teks biasa di sini..."></textarea>
 
-    <label>Secret Code</label>
-    <textarea id="code" readonly placeholder="Tempel kode rahasia di sini..."></textarea>
+  <label>Secret Code</label>
+  <textarea id="code" placeholder="Ketik atau tempel kode rahasia di sini..."></textarea>
 
-    <div class="hint">
-      Tap tahan → <b>Tempel</b> (keyboard tidak akan muncul)
-    </div>
+  <div class="hint">
+    Keyboard HP aktif • Tidak auto zoom • Bisa copy & paste
   </div>
+</div>
 
 <script>
-  const map = {
-    A:"/", B:":.", C:":", D:"|", E:"-:", F:"=",
-    G:"g~", H:"|-", I:"!", J:"'-", K:"'",
-    L:"--", M:"^", N:"\\", O:"°", P:"{",
-    Q:"x:", R:"r=", S:"≡", T:"─", U:"u:",
-    V:"_", W:"vv", X:"::", Y:"[", Z:">"
-  };
+const map = {
+  A:"/", B:":.", C:":", D:"|", E:"-:", F:"=",
+  G:"g~", H:"|-", I:"!", J:"'-", K:"'",
+  L:"--", M:"^", N:"\\", O:"°", P:"{",
+  Q:"x:", R:"r=", S:"≡", T:"─",
+  U:"u:", V:"_", W:"vv", X:"::",
+  Y:"[", Z:">"
+};
 
-  const reverseMap = Object.fromEntries(
-    Object.entries(map).map(([k,v]) => [v,k])
-  );
+const reverseMap = Object.fromEntries(
+  Object.entries(map).map(([k,v]) => [v,k])
+);
 
-  const plain = document.getElementById("plain");
-  const code  = document.getElementById("code");
+const plain = document.getElementById("plain");
+const code  = document.getElementById("code");
 
-  function encode(text) {
-    return text
-      .toUpperCase()
-      .split("")
-      .map(c => c === " " ? " " : (map[c] || ""))
-      .join("");
-  }
+let lock = false;
 
-  function decode(text) {
-    return text.split(" ").map(word => {
-      let out = "";
-      let buffer = "";
+plain.addEventListener("input", () => {
+  if (lock) return;
+  lock = true;
+  code.value = encode(plain.value);
+  lock = false;
+});
 
-      for (let ch of word) {
-        buffer += ch;
-        if (reverseMap[buffer]) {
-          out += reverseMap[buffer];
-          buffer = "";
-        }
+code.addEventListener("input", () => {
+  if (lock) return;
+  lock = true;
+  plain.value = decode(code.value);
+  lock = false;
+});
+
+function encode(text) {
+  return text.toUpperCase().split("").map(c => {
+    if (c === " ") return " ";
+    return map[c] || c;
+  }).join("");
+}
+
+function decode(text) {
+  let out = "";
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === " ") {
+      out += " ";
+      i++;
+      continue;
+    }
+    let found = false;
+    for (let key in reverseMap) {
+      if (text.startsWith(key, i)) {
+        out += reverseMap[key];
+        i += key.length;
+        found = true;
+        break;
       }
-      return out;
-    }).join(" ");
+    }
+    if (!found) {
+      out += text[i];
+      i++;
+    }
   }
-
-  plain.addEventListener("input", () => {
-    code.value = encode(plain.value);
-  });
-
-  code.addEventListener("input", () => {
-    plain.value = decode(code.value);
-  });
+  return out;
+}
 </script>
 </body>
 </html>
